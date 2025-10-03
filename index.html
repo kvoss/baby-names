@@ -140,6 +140,18 @@
             font-size: 1.5em;
             margin: 0 5px;
         }
+        .sample-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sample-buttons button {
+            background-color: #98fb98;
+            margin: 5px;
+        }
+        .sample-buttons button:hover {
+            background-color: #90ee90;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
 </head>
@@ -152,7 +164,11 @@
         <textarea id="nameInput" rows="5" placeholder="Enter potential baby names, one per line (e.g., Emma&#10;Oliver&#10;Ava)"></textarea>
         <br>
         <button onclick="addNames()">Add Names</button>
-        <button onclick="clearNames()">Clear List</button>
+        <div class="sample-buttons">
+            <button onclick="loadGirlSamples()">Add Sample Girl Names <span class="emoji">👧</span></button>
+            <button onclick="loadBoySamples()">Add Sample Boy Names <span class="emoji">👦</span></button>
+            <button onclick="clearNames()">Clear List</button>
+        </div>
     </div>
     
     <div class="section">
@@ -194,7 +210,6 @@
         <div id="finalList"></div>
         <div class="extra-features">
             <button onclick="exportList()">Export List <span class="emoji">💾</span></button>
-            <button onclick="loadExample()">Load Example Names <span class="emoji">⭐</span></button>
         </div>
     </div>
 
@@ -205,6 +220,9 @@
         let sortInProgress = false;
         let comparisonsDone = 0;
         let estimatedComparisons = 0;
+
+        const girlSamples = ['Olivia', 'Emma', 'Charlotte', 'Amelia', 'Sophia', 'Isabella', 'Ava', 'Mia', 'Evelyn', 'Luna', 'Harper', 'Gianna'];
+        const boySamples = ['Liam', 'Noah', 'Oliver', 'James', 'Elijah', 'Mateo', 'Theodore', 'Henry', 'Lucas', 'William', 'Benjamin', 'Levi'];
 
         function updateDisplay() {
             document.getElementById('currentList').textContent = list.join('\n');
@@ -226,6 +244,18 @@
             document.getElementById('finalList').textContent = '';
             hideComparison();
             document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function loadGirlSamples() {
+            list = [...girlSamples];
+            updateDisplay();
+            document.getElementById('nameInput').value = '';
+        }
+
+        function loadBoySamples() {
+            list = [...boySamples];
+            updateDisplay();
+            document.getElementById('nameInput').value = '';
         }
 
         function shuffleList() {
@@ -261,7 +291,7 @@
                 }
                 list = sorted;
                 updateDisplay();
-                document.getElementById('finalList').textContent = 'Your heart\'s top picks (most preferred first):\n' + list.join('\n');
+                displayFinalList();
                 document.getElementById('status').textContent = 'Sorting complete! Discover your favorites. ✨';
             } catch (e) {
                 document.getElementById('status').textContent = 'Sort interrupted.';
@@ -271,6 +301,18 @@
                 document.getElementById('progressContainer').style.display = 'none';
                 updateProgress(); // Ensure 100%
             }
+        }
+
+        function displayFinalList() {
+            let finalText = 'Your heart\'s top picks (most preferred first):\n';
+            for (let i = 0; i < list.length; i++) {
+                let medal = '';
+                if (i === 0) medal = '🥇 ';
+                else if (i === 1) medal = '🥈 ';
+                else if (i === 2) medal = '🥉 ';
+                finalText += `${medal}${i + 1}. ${list[i]}\n`;
+            }
+            document.getElementById('finalList').textContent = finalText;
         }
 
         function updateProgress() {
@@ -376,12 +418,6 @@
             a.download = 'favorite_baby_names.txt';
             a.click();
             URL.revokeObjectURL(url);
-        }
-
-        function loadExample() {
-            list = ['Emma', 'Oliver', 'Ava', 'Noah', 'Sophia', 'Liam', 'Isabella', 'Ethan'];
-            updateDisplay();
-            document.getElementById('nameInput').value = '';
         }
 
         // Allow Ctrl+Enter in textarea to add
