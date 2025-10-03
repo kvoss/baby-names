@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baby Name Preference Sorter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fffaf0;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #8b5a2b;
+            font-family: 'Dancing Script', cursive;
+            font-size: 2.5em;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border: 1px solid #f0e68c;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ffd700;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background-color: #9370db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 6px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #7b68ee;
+        }
+        button:disabled {
+            background-color: #d3d3d3;
+            cursor: not-allowed;
+        }
+        #currentList {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 6px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            border-left: 4px solid #9370db;
+        }
+        .comparison {
+            text-align: center;
+            font-size: 20px;
+            margin: 20px 0;
+            background: #f8f1f1;
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px dashed #ffb6c1;
+        }
+        .comparison button {
+            font-size: 18px;
+            padding: 15px 30px;
+            margin: 10px;
+            background-color: #ffb6c1;
+        }
+        .comparison button:hover {
+            background-color: #ff69b4;
+        }
+        .sort-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .sort-options button {
+            margin: 5px 10px;
+            background-color: #98fb98;
+        }
+        .sort-options button:hover {
+            background-color: #90ee90;
+        }
+        .status {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #8b5a2b;
+        }
+        #finalList {
+            background: #d4edda;
+            padding: 15px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            border-left: 4px solid #28a745;
+        }
+        .extra-features {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .extra-features button {
+            background-color: #ffdead;
+        }
+        .extra-features button:hover {
+            background-color: #ffdab9;
+        }
+        .info {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        #progressContainer {
+            margin: 10px 0;
+            display: none;
+        }
+        #progressBar {
+            width: 100%;
+            height: 20px;
+            border-radius: 10px;
+            background: #f0f0f0;
+        }
+        #estimate {
+            text-align: center;
+            font-style: italic;
+            color: #9370db;
+            margin: 10px 0;
+        }
+        .emoji {
+            font-size: 1.5em;
+            margin: 0 5px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <h1><span class="emoji">👶</span> Baby Name Preference Sorter <span class="emoji">❤️</span></h1>
+    <p style="text-align: center; color: #8b5a2b; font-size: 18px;">Helping parents discover their favorite names through gentle, insightful comparisons.</p>
+    
+    <div class="section">
+        <h2><span class="emoji">📝</span> Enter Baby Names</h2>
+        <textarea id="nameInput" rows="5" placeholder="Enter potential baby names, one per line (e.g., Emma&#10;Oliver&#10;Ava)"></textarea>
+        <br>
+        <button onclick="addNames()">Add Names</button>
+        <button onclick="clearNames()">Clear List</button>
+    </div>
+    
+    <div class="section">
+        <h2><span class="emoji">📋</span> Current List</h2>
+        <div id="currentList"></div>
+        <br>
+        <button onclick="shuffleList()">Shuffle List <span class="emoji">🔀</span></button>
+    </div>
+    
+    <div class="section">
+        <h2><span class="emoji">⚖️</span> Sort by Your Preference</h2>
+        <p class="info">Choose an efficient sorting method to minimize comparisons while revealing your true favorites.</p>
+        <div id="estimate"></div>
+        <div class="sort-options">
+            <button id="mergeBtn" onclick="startSort('merge')">Merge Sort</button>
+            <button id="quickBtn" onclick="startSort('quick')">Quick Sort</button>
+        </div>
+        <div class="status" id="status"></div>
+        <div id="progressContainer">
+            <progress id="progressBar" value="0" max="100"></progress>
+            <div id="progressText" style="text-align: center; margin-top: 5px;"></div>
+        </div>
+    </div>
+    
+    <div class="section" id="comparisonSection" style="display: none;">
+        <h2><span class="emoji">🤔</span> Which Name Speaks to Your Heart?</h2>
+        <div class="comparison">
+            <div id="nameA" style="font-size: 24px; font-weight: bold; margin: 10px 0;"></div>
+            <div style="font-size: 20px; color: #8b5a2b;">or</div>
+            <div id="nameB" style="font-size: 24px; font-weight: bold; margin: 10px 0;"></div>
+            <br>
+            <button onclick="choose('A')">I prefer <span id="nameA2" style="font-weight: bold;"></span> ❤️</button>
+            <button onclick="choose('B')">I prefer <span id="nameB2" style="font-weight: bold;"></span> ❤️</button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2><span class="emoji">🏆</span> Your Heart's Top Picks</h2>
+        <div id="finalList"></div>
+        <div class="extra-features">
+            <button onclick="exportList()">Export List <span class="emoji">💾</span></button>
+            <button onclick="loadExample()">Load Example Names <span class="emoji">⭐</span></button>
+        </div>
+    </div>
+
+    <script>
+        let list = [];
+        let sortType = '';
+        let comparer = null;
+        let sortInProgress = false;
+        let comparisonsDone = 0;
+        let estimatedComparisons = 0;
+
+        function updateDisplay() {
+            document.getElementById('currentList').textContent = list.join('\n');
+        }
+
+        function addNames() {
+            const input = document.getElementById('nameInput').value.trim();
+            if (input) {
+                const newNames = input.split('\n').map(n => n.trim()).filter(n => n);
+                list = list.concat(newNames);
+                document.getElementById('nameInput').value = '';
+                updateDisplay();
+            }
+        }
+
+        function clearNames() {
+            list = [];
+            updateDisplay();
+            document.getElementById('finalList').textContent = '';
+            hideComparison();
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function shuffleList() {
+            if (list.length < 2) return;
+            for (let i = list.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [list[i], list[j]] = [list[j], list[i]];
+            }
+            updateDisplay();
+        }
+
+        async function startSort(type) {
+            if (list.length < 2) {
+                alert('Need at least 2 names to sort!');
+                return;
+            }
+            sortType = type;
+            sortInProgress = true;
+            comparisonsDone = 0;
+            estimatedComparisons = list.length > 1 ? Math.ceil(list.length * Math.log2(list.length)) : 0;
+            document.getElementById('estimate').textContent = `Estimated comparisons: ~${estimatedComparisons}`;
+            document.getElementById('status').textContent = `Starting ${type} sort...`;
+            document.getElementById('progressContainer').style.display = 'block';
+            document.querySelectorAll('.sort-options button').forEach(btn => btn.disabled = true);
+            updateProgress();
+            let sorted;
+            try {
+                if (type === 'merge') {
+                    sorted = await mergeSort(list.slice());
+                } else if (type === 'quick') {
+                    sorted = list.slice();
+                    await quickSort(sorted, 0, sorted.length - 1);
+                }
+                list = sorted;
+                updateDisplay();
+                document.getElementById('finalList').textContent = 'Your heart\'s top picks (most preferred first):\n' + list.join('\n');
+                document.getElementById('status').textContent = 'Sorting complete! Discover your favorites. ✨';
+            } catch (e) {
+                document.getElementById('status').textContent = 'Sort interrupted.';
+            } finally {
+                sortInProgress = false;
+                document.querySelectorAll('.sort-options button').forEach(btn => btn.disabled = false);
+                document.getElementById('progressContainer').style.display = 'none';
+                updateProgress(); // Ensure 100%
+            }
+        }
+
+        function updateProgress() {
+            const percent = Math.min((comparisonsDone / estimatedComparisons) * 100, 100);
+            document.getElementById('progressBar').value = percent;
+            document.getElementById('progressText').textContent = `${Math.round(percent)}% (${comparisonsDone}/${estimatedComparisons})`;
+        }
+
+        async function userCompare(a, b) {
+            comparisonsDone++;
+            updateProgress();
+            return new Promise((resolve) => {
+                comparer = { a, b, resolve };
+                showComparisonNames(a, b);
+            });
+        }
+
+        function showComparisonNames(a, b) {
+            document.getElementById('nameA').textContent = a;
+            document.getElementById('nameA2').textContent = a;
+            document.getElementById('nameB').textContent = b;
+            document.getElementById('nameB2').textContent = b;
+            document.getElementById('comparisonSection').style.display = 'block';
+            document.getElementById('status').textContent = 'Which name warms your heart more?';
+        }
+
+        function hideComparison() {
+            document.getElementById('comparisonSection').style.display = 'none';
+        }
+
+        function choose(choice) {
+            if (!comparer) return;
+            const { a, b, resolve } = comparer;
+            const prefersA = choice === 'A';
+            document.getElementById('status').textContent = '';
+            hideComparison();
+            comparer = null;
+            resolve(prefersA ? -1 : 1); // -1 if a > b (a more preferred), 1 if b > a
+        }
+
+        // Merge Sort
+        async function mergeSort(arr) {
+            if (arr.length <= 1) return arr;
+            const mid = Math.floor(arr.length / 2);
+            const left = await mergeSort(arr.slice(0, mid));
+            const right = await mergeSort(arr.slice(mid));
+            return await merge(left, right);
+        }
+
+        async function merge(left, right) {
+            let result = [];
+            let i = 0, j = 0;
+            while (i < left.length && j < right.length) {
+                if (!sortInProgress) throw new Error('Sort interrupted');
+                const cmp = await userCompare(left[i], right[j]);
+                if (cmp < 0) { // left[i] > right[j], take left[i] first
+                    result.push(left[i]);
+                    i++;
+                } else {
+                    result.push(right[j]);
+                    j++;
+                }
+            }
+            while (i < left.length) result.push(left[i++]);
+            while (j < right.length) result.push(right[j++]);
+            return result;
+        }
+
+        // Quick Sort
+        async function quickSort(arr, low = 0, high = arr.length - 1) {
+            if (low < high) {
+                const pi = await partition(arr, low, high);
+                await quickSort(arr, low, pi - 1);
+                await quickSort(arr, pi + 1, high);
+            }
+        }
+
+        async function partition(arr, low, high) {
+            // Random pivot for better average performance
+            const pivotIdx = low + Math.floor(Math.random() * (high - low + 1));
+            [arr[pivotIdx], arr[high]] = [arr[high], arr[pivotIdx]];
+            const pivot = arr[high];
+            let i = low - 1;
+            for (let j = low; j < high; j++) {
+                if (!sortInProgress) throw new Error('Sort interrupted');
+                const cmp = await userCompare(arr[j], pivot);
+                if (cmp < 0) { // arr[j] > pivot
+                    i++;
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+            }
+            i++;
+            [arr[i], arr[high]] = [arr[high], arr[i]];
+            return i;
+        }
+
+        // Extra features
+        function exportList() {
+            const blob = new Blob([list.join('\n')], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'favorite_baby_names.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function loadExample() {
+            list = ['Emma', 'Oliver', 'Ava', 'Noah', 'Sophia', 'Liam', 'Isabella', 'Ethan'];
+            updateDisplay();
+            document.getElementById('nameInput').value = '';
+        }
+
+        // Allow Ctrl+Enter in textarea to add
+        document.getElementById('nameInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                addNames();
+            }
+        });
+
+        updateDisplay(); // Initial empty
+    </script>
+</body>
+</html>
+
